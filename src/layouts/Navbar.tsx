@@ -6,8 +6,8 @@ import {
   NavigationMenuLink,
   NavigationMenuTrigger,
   NavigationMenuViewport,
-} from '../components/ModernTheme/NavigationMenu';
-import { Button } from '../components/ModernTheme/Button';
+} from '../components/NavigationMenu';
+import { Button } from '../components/Button';
 
 const Navbar = () => {
   return (
