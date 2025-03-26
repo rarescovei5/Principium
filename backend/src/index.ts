@@ -1,1 +1,1 @@
-import './config/secrets';
+import './config/secrets.js';
