@@ -222,7 +222,7 @@ const NavigationMenuViewport: React.FC<NavigationMenuViewportProps> = ({
   return (
     contentHTML && (
       <div
-        className={`top-[calc(100%+0.25rem)] left-0 absolute border border-border rounded-lg z-1000 bg-bg overflow-hidden ${className}`}
+        className={`top-[calc(100%+0.25rem)] left-1/2 -translate-x-[50%] absolute border border-border rounded-lg z-1000 bg-bg overflow-hidden ${className}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         {...props}

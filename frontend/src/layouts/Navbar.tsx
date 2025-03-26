@@ -11,15 +11,18 @@ import { Button } from '../components/Button';
 
 const Navbar = () => {
   return (
-    <nav className="text-white mx-40 max-md:mx-auto max-md:w-[90%] mt-2 flex justify-between items-center">
-      <div className="flex-1">
-        <h3 className="h3 max-md:hidden">Principium</h3>
-        <p className="p md:hidden">Principium</p>
+    <nav className="text-white mx-40 max-xl:mx-auto max-xl:w-[90%] mt-2 flex justify-between items-center">
+      <div className="xl:flex-1">
+        <Link to={'/'} className="h3">
+          Principium
+        </Link>
       </div>
       <div className="flex-1 gird place-items-center">
         <NavigationMenu>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Getting Started</NavigationMenuTrigger>
+            <NavigationMenuTrigger className="text-nowrap">
+              Getting Started
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid gap-3 p-6 w-2xl max-md:w-[400px] max-lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                 <li className="row-span-3">
@@ -117,7 +120,7 @@ const Navbar = () => {
           <NavigationMenuViewport />
         </NavigationMenu>
       </div>
-      <div className="flex gap-2 flex-1 justify-end">
+      <div className="flex gap-2  justify-end xl:flex-1">
         <Link to={'login'}>
           <Button variant="secondary">Login</Button>
         </Link>
