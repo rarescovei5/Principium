@@ -1,5 +1,4 @@
 import mysql from 'mysql2/promise';
-console.log(process.env.DB_USER);
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -9,6 +8,22 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+});
+
+pool
+  .getConnection()
+  .then((conn) => {
+    console.log('✅ MySQL connection established');
+    conn.release();
+  })
+  .catch((err) => {
+    console.error('❌ Unable to connect to MySQL:', err);
+  });
+
+process.on('SIGINT', async () => {
+  await pool.end(); // closes all active connections
+  console.log('🔌 MySQL pool closed');
+  process.exit(0);
 });
 
 export default pool;
