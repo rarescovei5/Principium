@@ -26,7 +26,8 @@ export const verifyJWT = (
       return;
     }
 
-    req.body.user_id = (decoded as any).user_id;
+    req.user = { id: (decoded as any).user_id };
+
     next();
   });
 };

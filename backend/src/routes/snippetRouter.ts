@@ -6,9 +6,9 @@ import { verifyJWT } from '../middleware/verifyJWT';
 const snippetRouter = express.Router();
 
 snippetRouter
-  .get('/:id', snippetController.handleGetById)
-  .get('/:page', snippetController.handleGetPage)
+  .get('/page/:page', snippetController.handleGetPage)
   .use(verifyJWT)
+  .get('/:id', snippetController.handleGetById)
   .post('/', snippetController.handleCreate)
   .put('/:id', snippetController.handleModify)
   .delete('/:id', snippetController.handleDelete);
