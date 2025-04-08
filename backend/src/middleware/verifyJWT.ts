@@ -9,7 +9,7 @@ export const verifyJWT = (
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) {
-    res.status(401);
+    res.sendStatus(401);
     return;
   }
 
@@ -22,13 +22,11 @@ export const verifyJWT = (
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!, (err, decoded) => {
     if (err) {
-      res.sendStatus(403); // Respond with 403
+      res.sendStatus(403);
       return;
     }
 
     req.body.user_id = (decoded as any).user_id;
-    // Debugging statement for successful token verification
-
-    next(); // Pass control to the next middleware
+    next();
   });
 };
