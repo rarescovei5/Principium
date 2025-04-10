@@ -6,7 +6,7 @@ import { verifyJWT } from '../middleware/verifyJWT';
 const snippetRouter = express.Router();
 
 snippetRouter
-  .get('/page/:page', snippetController.handleGetPage)
+  .get('/discover', snippetController.handleGetPage)
   .use(verifyJWT)
   .get('/:id', snippetController.handleGetById)
   .post('/', snippetController.handleCreate)

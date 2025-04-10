@@ -3,7 +3,38 @@ import { CodeSnippet } from '../model/CodeSnippet';
 import pool from '../model/db';
 import { error } from 'console';
 
-const handleGetPage = async (req: express.Request, res: express.Response) => {};
+const handleGetPage = async (req: express.Request, res: express.Response) => {
+  //Queries
+  const countQuery = 'SELECT COUNT(*) AS total FROM `code_snippets`';
+  const dataQuery = 'SELECT * FROM `code_snippets` LIMIT ? OFFSET ?';
+
+  const DEFAULT_PAGE = 1;
+  const DEFAULT_LIMIT = 12;
+
+  const page = parseInt(req.query.page as string) || DEFAULT_PAGE;
+  const limit = parseInt(req.query.limit as string) || DEFAULT_LIMIT;
+
+  const offset = (page - 1) * limit;
+
+  try {
+    const [countResult] = await pool.query(countQuery);
+    const totalRecords = (countResult as any)[0].total;
+
+    const [data] = await pool.query(dataQuery, [limit, offset]);
+
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    res.status(200).json({
+      totalRecords,
+      totalPages,
+      currentPage: page,
+      records: data,
+    });
+  } catch (err) {
+    console.error('Database query error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 const handleGetById = async (req: express.Request, res: express.Response) => {
   const q = 'SELECT * FROM `code_snippets` WHERE `id` = ?';
   const id = req.params.id;
@@ -72,9 +103,7 @@ const handleModify = async (req: express.Request, res: express.Response) => {
   if (!req.user?.id) {
     res.status(501).json({ error: 'User not authenticated' });
     return;
-  }
-
-  if (
+  } else if (
     !updatedSnippet.title ||
     !updatedSnippet.description ||
     !updatedSnippet.code ||
@@ -83,16 +112,16 @@ const handleModify = async (req: express.Request, res: express.Response) => {
     res.status(500).json({ error: 'Missing required fields.' });
     return;
   }
-  const values = [
-    updatedSnippet.title,
-    updatedSnippet.description,
-    updatedSnippet.code,
-    updatedSnippet.language,
-    req.params.id,
-    req.user.id,
-  ];
 
   try {
+    const values = [
+      updatedSnippet.title,
+      updatedSnippet.description,
+      updatedSnippet.code,
+      updatedSnippet.language,
+      req.params.id,
+      req.user.id,
+    ];
     await pool.query(q, values);
     res.sendStatus(200);
   } catch (error) {
@@ -100,7 +129,20 @@ const handleModify = async (req: express.Request, res: express.Response) => {
     return;
   }
 };
-const handleDelete = async (req: express.Request, res: express.Response) => {};
+const handleDelete = async (req: express.Request, res: express.Response) => {
+  const q = 'DELETE FROM `code_snippets` WHERE `id` = ? AND `user_id` = ?';
+  if (!req.user?.id) {
+    res.status(501).json({ error: 'User not authenticated' });
+    return;
+  }
+  try {
+    const values = [req.params.id, req.user.id];
+    await pool.query(q, values);
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
 
 export {
   handleCreate,
