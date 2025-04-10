@@ -8,6 +8,6 @@ const corsOptions = {
     }
   },
   methods: ['POST', 'GET', 'PUT', 'DELETE'],
-  credentials: true, // Allow cookies and credentials
+  credentials: true,
 };
 export default corsOptions;
