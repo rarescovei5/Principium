@@ -32,7 +32,7 @@ const handleGetPage = async (req: express.Request, res: express.Response) => {
     });
   } catch (err) {
     console.error('Database query error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error.' });
   }
 };
 const handleGetById = async (req: express.Request, res: express.Response) => {
@@ -55,7 +55,7 @@ const handleGetById = async (req: express.Request, res: express.Response) => {
       isAuthor: req.user?.id === codeSnippet.user_id,
     });
     return;
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ error });
     return;
   }
@@ -66,7 +66,7 @@ const handleCreate = async (req: express.Request, res: express.Response) => {
   const snippet: Partial<CodeSnippet> = req.body;
 
   if (!req.user?.id) {
-    res.status(501).json({ error: 'User not authenticated' });
+    res.status(401).json({ error: 'User not authenticated.' });
     return;
   }
 
@@ -76,7 +76,7 @@ const handleCreate = async (req: express.Request, res: express.Response) => {
     !snippet.code ||
     !snippet.language
   ) {
-    res.status(500).json({ error: 'Missing required fields.' });
+    res.status(400).json({ error: 'Missing required fields.' });
     return;
   }
 
@@ -90,7 +90,7 @@ const handleCreate = async (req: express.Request, res: express.Response) => {
 
   try {
     await pool.query(q, [values]);
-    res.sendStatus(200);
+    res.status(200).json({ message: 'Snippet created successfully.' });
   } catch (error) {
     res.status(500).json({ error });
   }
@@ -101,7 +101,7 @@ const handleModify = async (req: express.Request, res: express.Response) => {
   const updatedSnippet: Partial<CodeSnippet> = req.body;
 
   if (!req.user?.id) {
-    res.status(501).json({ error: 'User not authenticated' });
+    res.status(401).json({ error: 'User not authenticated.' });
     return;
   } else if (
     !updatedSnippet.title ||
@@ -109,7 +109,7 @@ const handleModify = async (req: express.Request, res: express.Response) => {
     !updatedSnippet.code ||
     !updatedSnippet.language
   ) {
-    res.status(500).json({ error: 'Missing required fields.' });
+    res.status(400).json({ error: 'Missing required fields.' });
     return;
   }
 
@@ -123,7 +123,7 @@ const handleModify = async (req: express.Request, res: express.Response) => {
       req.user.id,
     ];
     await pool.query(q, values);
-    res.sendStatus(200);
+    res.status(200).json({ message: 'Snippet modified successfully.' });
   } catch (error) {
     res.status(500).json({ error });
     return;
@@ -132,13 +132,13 @@ const handleModify = async (req: express.Request, res: express.Response) => {
 const handleDelete = async (req: express.Request, res: express.Response) => {
   const q = 'DELETE FROM `code_snippets` WHERE `id` = ? AND `user_id` = ?';
   if (!req.user?.id) {
-    res.status(501).json({ error: 'User not authenticated' });
+    res.status(401).json({ error: 'User not authenticated.' });
     return;
   }
   try {
     const values = [req.params.id, req.user.id];
     await pool.query(q, values);
-    res.sendStatus(200);
+    res.status(200).json({ message: 'Snippet deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error });
   }
