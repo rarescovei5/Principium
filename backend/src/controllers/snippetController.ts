@@ -1,13 +1,34 @@
 import express from 'express';
 import { CodeSnippet } from '../model/CodeSnippet';
 import pool from '../model/db';
-import { error } from 'console';
 
 const handleGetPage = async (req: express.Request, res: express.Response) => {
-  //Queries
-  const countQuery = 'SELECT COUNT(*) AS total FROM `code_snippets`';
-  const dataQuery = 'SELECT * FROM `code_snippets` LIMIT ? OFFSET ?';
+  // Get Filters
+  const languageFilter = req.query.language as string | undefined;
+  const titleFilter = req.query.title as string | undefined;
 
+  // Base queries
+  let countQuery = 'SELECT COUNT(*) AS total FROM `code_snippets`';
+  let dataQuery = 'SELECT * FROM `code_snippets`';
+  const queryParams: any[] = [];
+
+  // Add Filters
+  const whereClauses: string[] = [];
+  if (languageFilter) {
+    whereClauses.push('`language` = ?');
+    queryParams.push(languageFilter);
+  }
+  if (titleFilter) {
+    whereClauses.push('`title` LIKE ?');
+    queryParams.push(`%${titleFilter}%`);
+  }
+  if (whereClauses.length > 0) {
+    const whereSQL = ' WHERE ' + whereClauses.join(' AND ');
+    countQuery += whereSQL;
+    dataQuery += whereSQL;
+  }
+
+  // Pagination defaults
   const DEFAULT_PAGE = 1;
   const DEFAULT_LIMIT = 12;
 
@@ -16,11 +37,19 @@ const handleGetPage = async (req: express.Request, res: express.Response) => {
 
   const offset = (page - 1) * limit;
 
+  // Add LIMIT and OFFSET to data query
+  dataQuery += ' LIMIT ? OFFSET ?';
+  queryParams.push(limit, offset);
+
   try {
-    const [countResult] = await pool.query(countQuery);
+    const [countResult] = await pool.query(
+      countQuery,
+      queryParams.slice(0, queryParams.length - 2)
+    );
     const totalRecords = (countResult as any)[0].total;
 
-    const [data] = await pool.query(dataQuery, [limit, offset]);
+    // Execute data query
+    const [data] = await pool.query(dataQuery, queryParams);
 
     const totalPages = Math.ceil(totalRecords / limit);
 
@@ -35,6 +64,7 @@ const handleGetPage = async (req: express.Request, res: express.Response) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
+
 const handleGetById = async (req: express.Request, res: express.Response) => {
   const q = 'SELECT * FROM `code_snippets` WHERE `id` = ?';
   const id = req.params.id;

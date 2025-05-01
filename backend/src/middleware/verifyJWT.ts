@@ -7,7 +7,6 @@ export const verifyJWT = (
   next: express.NextFunction
 ) => {
   const authHeader = req.headers['authorization'];
-
   if (!authHeader) {
     res.sendStatus(401);
     return;
