@@ -10,7 +10,7 @@ const handleGetPage = async (req: express.Request, res: express.Response) => {
   // Base queries
   let countQuery = 'SELECT COUNT(*) AS total FROM `code_snippets`';
   let dataQuery =
-    'SELECT `title`, `description`, `code`, `language` FROM `code_snippets`';
+    'SELECT `id`, `title`, `description`, `code`, `language` FROM `code_snippets`';
   const queryParams: any[] = [];
 
   // Add Filters
