@@ -65,7 +65,27 @@ const handleGetPage = async (req: express.Request, res: express.Response) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
+const handleGetSnippetsByIDS = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const q = 'SELECT * FROM `code_snippets` WHERE `id` IN (?);';
+  const ids = req.body.ids;
 
+  if (ids.length === 0) {
+    res.status(200).json([]);
+    return;
+  }
+
+  try {
+    const [data] = await pool.query(q, [ids]);
+    const d = data as CodeSnippet[];
+
+    res.status(200).json(d);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+};
 const handleGetById = async (req: express.Request, res: express.Response) => {
   const q = 'SELECT * FROM `code_snippets` WHERE `id` = ?';
   const id = req.params.id;
@@ -181,4 +201,5 @@ export {
   handleGetPage,
   handleModify,
   handleGetById,
+  handleGetSnippetsByIDS,
 };
