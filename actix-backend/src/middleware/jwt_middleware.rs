@@ -6,6 +6,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 
 use crate::{models::Claims, AppState};
 
+#[derive(Clone)]
 pub struct VerifyJWT {
     app_data: web::Data<AppState>,
 }

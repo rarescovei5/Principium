@@ -16,11 +16,6 @@ pub struct Snippet {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug,Deserialize)]
-pub struct CreateSnippetRequest {
-    pub title: String,
-}
-
 // ______________________________________ Snippet Tags ______________________________________
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Tag {

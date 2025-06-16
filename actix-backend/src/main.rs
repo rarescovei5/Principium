@@ -1,6 +1,7 @@
 use actix_web::{middleware::Logger, web::{self, Data}, App, HttpServer};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
+use crate::middleware::jwt_middleware::VerifyJWT;
 
 mod handlers;
 mod models;
@@ -47,13 +48,16 @@ async fn main () -> std::io::Result<()> {
         jwt_refresh_secret: jwt_refresh_secret.clone(),
     });
 
+    let jwt_middleware = VerifyJWT::new(app_data.clone());
+
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone()) 
             .wrap(Logger::default())
             .service(
                 web::scope("/api")
-                    .configure(routes::auth_routes::config) 
+                    .configure(routes::auth_routes::config)
+                    .configure(|cfg| routes::snippet_routes::config(cfg, jwt_middleware.clone()))
             ) 
     })
     .bind((host, port))? 

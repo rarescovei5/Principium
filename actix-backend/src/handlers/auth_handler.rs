@@ -5,14 +5,26 @@ use actix_web::{
 use bcrypt::{hash, verify};
 use chrono::{Utc, Duration as ChronoDuration};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use serde::Deserialize;
 use sqlx::Error;
 use uuid::Uuid;
 
 use crate::{
-    models::{Claims, UserData, UserLoginRequest, UserRegisterRequest, UserSession},
+    models::{Claims, UserData, UserSession},
     utils::test_password,
     AppState,
 };
+
+
+#[derive(Debug, Deserialize)]
+pub struct UserRegisterRequest {
+    pub email: String,
+    pub username: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub password: String,
+}
+
 
 #[post("/register")]
 pub async fn register(
@@ -60,6 +72,13 @@ pub async fn register(
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+pub struct UserLoginRequest {
+    pub email: String,
+    pub password: String,
+}
+
 
 #[post("/login")]
 pub async fn login(

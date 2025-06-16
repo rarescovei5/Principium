@@ -1,7 +1,6 @@
 mod user;
 pub use user::{
-    User, UserSession, Subscription, 
-    UserLoginRequest, UserRegisterRequest
+    User, UserSession, Subscription
 };
 
 mod claims;

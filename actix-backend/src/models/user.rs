@@ -18,23 +18,6 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct UserRegisterRequest {
-    pub email: String,
-    pub username: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub password: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct UserLoginRequest {
-    pub email: String,
-    pub password: String,
-}
-
-
-
 // ______________________________________ User Session ______________________________________
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct UserSession {
@@ -48,8 +31,6 @@ pub struct UserSession {
     pub last_used_at: DateTime<Utc>,
     pub revoked: bool,
 }
-
-
 
 // ______________________________________ Subscription ______________________________________
 
