@@ -1,20 +1,20 @@
 services:
   backend:
-    container_name: principium-backend-prod
     build:
       context: ./actix-backend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     ports:
       - '8080:8080'
     env_file:
-      - ./actix-backend/.env.dev
+      - ./actix-backend/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/principium
     depends_on:
       - db
     restart: unless-stopped
 
   db:
     image: postgres:17
-    container_name: principium-db-prod
     restart: always
     environment:
       POSTGRES_USER: postgres

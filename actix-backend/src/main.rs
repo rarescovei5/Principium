@@ -25,7 +25,7 @@ async fn main () -> std::io::Result<()> {
     
     env_logger::init();
 
-    dotenv::from_filename(".env.local")
+    dotenv::from_filename(".env")
         .or_else(|_| dotenv::dotenv())
         .ok();
 
