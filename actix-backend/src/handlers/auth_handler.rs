@@ -20,8 +20,7 @@ use crate::{
 pub struct UserRegisterRequest {
     pub email: String,
     pub username: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub full_name: Option<String>,
     pub password: String,
 }
 
@@ -47,13 +46,12 @@ pub async fn register(
 
     let res = sqlx::query!(
         r#"
-        INSERT INTO users (email, username, first_name, last_name, password_hash)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO users (email, username, full_name, password_hash)
+        VALUES ($1, $2, $3, $4)
         "#,
         req.email,
         req.username,
-        req.first_name,
-        req.last_name,
+        req.full_name,
         password_hash
     )
     .execute(&app_state.db)

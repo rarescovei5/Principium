@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{middleware::Logger, web::{self, Data}, App, HttpServer};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
@@ -51,9 +52,17 @@ async fn main () -> std::io::Result<()> {
     let jwt_middleware = VerifyJWT::new(app_data.clone());
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .supports_credentials() 
+            .max_age(3600);
+
         App::new()
             .app_data(app_data.clone()) 
             .wrap(Logger::default())
+            .wrap(cors)
             .service(
                 web::scope("/api")
                     .configure(routes::auth_routes::config)
