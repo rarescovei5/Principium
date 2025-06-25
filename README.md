@@ -1,29 +1,79 @@
-# **Principium API**
+# Principium Studio
 
-The backend API for **Principium** — a platform that provides users access to high-quality replicas of premium apps, now completely **free and open source**.
+**Principium** is an open-source project focused on rebuilding high-quality versions of popular apps — without locking essential features behind paywalls.
 
-This repository contains the core backend services responsible for:
+This repository hosts the **full stack** of the Principium platform:
 
-* User authentication
-* App access control
-* Secure API token management
+- 🧠 **Backend** – Built in **Rust** with Actix Web and PostgreSQL
+- 💻 **Frontend** – A modern UI for managing code snippets and user sessions
+- 🗄️ **Database & Schema** – Designed with SQLx and Docker-based provisioning
 
-## 🚀 Overview
+## 🧩 Apps We're Building
 
-**Principium's mission** is to make modern software accessible to everyone through a unified, open, and community-driven platform. The **Principium API** is the foundation for managing users, access rights, and secure app delivery — without any paywalls, tracking, or restrictions.
+| Name              | Type            | Inspired By      | Status         |
+| ----------------- | --------------- | ---------------- | -------------- |
+| VSC Code Snippets | Snippet Manager | -                | ✅ Working     |
+| Write Right       | Markdown Editor | Notion, Obsidian | 🛠️ In Progress |
+| Task Track        | Kanban Board    | Trello, Notion   | 🛠️ In Progress |
 
-## 🧰 Tech Stack
+## 🚀 Features
 
-* TypeScript
-* Node.js + Express
-* MySQL
-* JWT for authentication
-* REST API architecture
+### 🔐 Authentication
 
-## 📦 Features
+- User registration and login with strong password validation
+- JWT-based access and refresh tokens (15 min / 24 hr)
+- Session tracking via device ID stored in secure cookies
+- Secure password hashing with `bcrypt`
 
-* 🔐 **Secure user registration & login**
-* 🎟️ **API tokens for app access**
-* ⚡ **Lightweight and privacy-respecting**
-* 🌍 **Open-source and community-driven**
+### 📘 Snippet Management (VSC Code Snippets)
 
+- CRUD operations for code snippets
+- Tagging, starring, and full pagination support
+- Batch fetching and ownership validation
+- All actions are scoped to the authenticated user
+
+## 📚 Endpoints
+
+All endpoints are prefixed by `/api` and their respective version (e.g. `/api/v1/**`).
+
+### 🧾 Auth Routes
+
+| Method | Endpoint         | Description                            |
+| ------ | ---------------- | -------------------------------------- |
+| POST   | `/auth/register` | Register a new user                    |
+| POST   | `/auth/login`    | Authenticate and receive access token  |
+| POST   | `/auth/logout`   | Logout and revoke session              |
+| POST   | `/auth/refresh`  | Refresh access token via secure cookie |
+
+### 🔖 Snippet Routes
+
+| Method | Endpoint                              | Description                   |
+| ------ | ------------------------------------- | ----------------------------- |
+| POST   | `/users/snippets`                     | Create a new snippet          |
+| GET    | `/users/{userId}/snippets`            | Get all snippets by a user    |
+| GET    | `/users/{userId}/snippets/{id}`       | Get a single snippet          |
+| GET    | `/public/snippets/batch?ids=...`      | Batch fetch multiple snippets |
+| GET    | `/public/snippets?page=X&limit=Y&...` | Paginated search with filters |
+| PUT    | `/users/snippets/{id}`                | Update a snippet (owner only) |
+| DELETE | `/users/snippets/{id}`                | Delete a snippet (owner only) |
+| POST   | `/users/{snippetId}/star`             | Star a snippet                |
+| DELETE | `/users/{snippetId}/star`             | Unstar a snippet              |
+
+## 🛠️ Tech Stack
+
+- **Rust** with [Actix Web](https://actix.rs/)
+- **PostgreSQL 17** via Docker
+- **sqlx** for database access
+- **jsonwebtoken** for token handling
+- **bcrypt** for password hashing
+- **serde** for JSON (de)serialization
+
+## 🐳 Running with Docker
+
+```bash
+docker compose up --build
+```
+
+## 📄 License
+
+Licensed under the MIT License.
