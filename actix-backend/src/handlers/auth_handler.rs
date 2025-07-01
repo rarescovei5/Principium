@@ -386,3 +386,39 @@ pub async fn refresh(
     HttpResponse::Ok()
         .json(serde_json::json!({ "accessToken": access_token, "error": null }))
 }
+
+#[post("/user")]
+async fn retrive_user(app_state: web::Data<AppState>, user_data: web::ReqData<UserData>) -> actix_web::Result<impl Responder> {
+    let user_id = user_data.id;
+
+    let row = sqlx::query!(
+        r#"
+        SELECT
+          u.email,
+          u.full_name,
+          u.profile_picture_url,
+          COALESCE(s.plan::TEXT, 'free') AS subscription_plan
+        FROM users u
+        LEFT JOIN subscriptions s
+          ON s.user_id = u.id
+        WHERE u.id = $1
+        "#,
+        user_id
+    )
+    .fetch_optional(&app_state.db)
+    .await
+    .map_err(actix_web::error::ErrorInternalServerError)?;
+
+    if let Some(data) = row {
+        Ok(HttpResponse::Ok().json(serde_json::json!({
+            "email": data.email,
+            "fullName": data.full_name,
+            "profilePicture": data.profile_picture_url,
+            "subscriptionPlan": data.subscription_plan,
+        })))
+    } else {
+        Ok(HttpResponse::NotFound().json(serde_json::json!({
+            "error": format!("No user found with id {}", user_id)
+        })))
+    }
+}

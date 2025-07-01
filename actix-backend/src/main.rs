@@ -65,7 +65,7 @@ async fn main () -> std::io::Result<()> {
             .wrap(cors)
             .service(
                 web::scope("/api")
-                    .configure(routes::auth_routes::config)
+                    .configure(|cfg| routes::auth_routes::config(cfg,jwt_middleware.clone()))
                     .configure(|cfg| routes::snippet_routes::config(cfg, jwt_middleware.clone()))
             ) 
     })

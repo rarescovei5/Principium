@@ -13,12 +13,13 @@ pub fn config(config: &mut web::ServiceConfig, jwt_middleware: VerifyJWT) {
         .wrap(jwt_middleware.clone())
     ).service(
         web::scope("/v1/snippets")
-        .service(snippet_handler::star_snippet)
-        .service(snippet_handler::unstar_snippet)
-        .wrap(jwt_middleware)
-    ).service(
-        web::scope("/v1/public/snippets")
         .service(snippet_handler::get_page_snippets)
         .service(snippet_handler::get_snippets_by_ids)
+        .service(
+            web::scope("")
+            .service(snippet_handler::star_snippet)
+            .service(snippet_handler::unstar_snippet)
+            .wrap(jwt_middleware)
+        )
     );
 }
