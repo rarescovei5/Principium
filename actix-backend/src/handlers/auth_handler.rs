@@ -230,10 +230,44 @@ pub async fn login(
         .path("/")
         .finish();
 
+    let row = match sqlx::query!(
+        r#"
+        SELECT
+          u.email,
+          u.username,
+          u.profile_picture_url,
+          COALESCE(s.plan::TEXT, 'free') AS subscription_plan
+        FROM users u
+        LEFT JOIN subscriptions s
+          ON s.user_id = u.id
+        WHERE u.id = $1
+        "#,
+        user_id
+    )
+    .fetch_one(&app_state.db)
+    .await
+    {
+        Ok(data) => data,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .json(serde_json::json!({ "error": "DB error fetching user data" }));
+        }
+    };
+
     HttpResponse::Ok()
         .cookie(refresh_cookie)
         .cookie(device_cookie)
-        .json(serde_json::json!({ "accessToken": access_token, "error": null }))
+        .json(serde_json::json!({ 
+            "accessToken": access_token,
+            "user": {
+                "id": user_id,
+                "email": row.email,
+                "username": row.username,
+                "profilePictureUrl": row.profile_picture_url,
+                "subscriptionPlan": row.subscription_plan,
+            }, 
+            "error": null 
+        }))
 }
 
 #[post("/logout")]
@@ -368,30 +402,6 @@ pub async fn refresh(
         }
     };
 
-    let row = match sqlx::query!(
-        r#"
-        SELECT
-          u.email,
-          u.username,
-          u.profile_picture_url,
-          COALESCE(s.plan::TEXT, 'free') AS subscription_plan
-        FROM users u
-        LEFT JOIN subscriptions s
-          ON s.user_id = u.id
-        WHERE u.id = $1
-        "#,
-        user_id
-    )
-    .fetch_one(&app_state.db)
-    .await
-    {
-        Ok(data) => data,
-        Err(_) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({ "error": "DB error fetching user data" }));
-        }
-    };
-
     let exp = Utc::now() + ChronoDuration::minutes(15);
     let claims = Claims { exp: exp.timestamp() as usize, user: UserData { id: session.user_id } };
 
@@ -409,12 +419,6 @@ pub async fn refresh(
 
    HttpResponse::Ok().json(serde_json::json!({
         "accessToken": access_token,
-        "user": {
-            "email": row.email,
-            "username": row.username,
-            "profilePicture": row.profile_picture_url,
-            "subscriptionPlan": row.subscription_plan,
-        },
         "error": null
     }))
 }

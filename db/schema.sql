@@ -19,7 +19,7 @@ CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT UNIQUE NOT NULL,
     username TEXT UNIQUE NOT NULL,
-    full_name TEXT,
+    full_name TEXT NOT NULL,
     profile_picture_url TEXT,
     password_hash TEXT NOT NULL,
     email_verified BOOLEAN DEFAULT FALSE,
