@@ -3,41 +3,32 @@ import { Link } from 'react-router-dom';
 import * as React from 'react';
 import { PackageIcon } from 'lucide-react';
 import { DiscoverApp } from '@/types';
+import { useApps } from '@/app/AppsProvider';
 
 const DiscoverPage = () => {
-  const [apps, setApps] = React.useState<DiscoverApp[]>([]);
-  const [categories, setCategories] = React.useState<string[]>([]);
-  
-  React.useEffect(() => {
-    let mockupApps: DiscoverApp[] = [
-      {
-        image: 'https://via.placeholder.com/150',
-        name: 'Synclite',
-        id: '1',
-        category: 'Productivity',
-      },
-      {
-        image: 'https://via.placeholder.com/150',
-        name: 'Baum',
-        id: '2',
-        category: 'Productivity',
-      },
-      {
-        image: 'https://via.placeholder.com/150',
-        name: 'TaskTrack',
-        id: '3',
-        category: 'Productivity',
-      },
-    ];
-    setApps(mockupApps);
-    setCategories([...new Set(mockupApps.map((app) => app.category))]);
-  }, []);
+  const { apps } = useApps();
+  const categories = React.useMemo(
+    () => apps ? [...new Set(apps.map((app) => app.category))] : [],
+    [apps]
+  );
+
+  if (!apps) {
+    return (
+      <main className="my-2 px-8 pt-8 mr-2 bg-background rounded-md flex-1">
+        <ScrollArea className="flex-1 min-h-0 relative"></ScrollArea>
+      </main>
+    );
+  }
 
   return (
     <main className="my-2 px-8 pt-8 mr-2 bg-background rounded-md flex-1">
       <ScrollArea className="flex-1 min-h-0 relative">
         {categories.map((category) => (
-          <Category key={category} name={category} apps={apps.filter((app) => app.category === category)} />
+          <Category
+            key={category}
+            name={category}
+            apps={apps.filter((app) => app.category === category)}
+          />
         ))}
       </ScrollArea>
     </main>
@@ -56,24 +47,24 @@ const Category = ({ name, apps }: { name: string; apps: Array<DiscoverApp> }) =>
         className="grid gap-2"
       >
         {apps.map((app) => (
-          <App key={app.id} {...app} />
+          <App key={app.name} {...app} />
         ))}
       </div>
     </section>
   );
 };
 
-const App = ({ image, name, id }: DiscoverApp) => {
+const App = ({ appIcon, name }: DiscoverApp) => {
   const [imgFailedToLoad, setImgFailedToLoad] = React.useState(false);
   return (
-    <Link to={`/app/$${id}`} className="flex flex-col gap-2">
+    <Link to={`/apps/${name}`} className="flex flex-col gap-2">
       {imgFailedToLoad ? (
         <div className="rounded-md bg-secondary w-32 h-32 flex items-center justify-center">
           <PackageIcon size={64} />
         </div>
       ) : (
         <img
-          src={image}
+          src={appIcon}
           alt={name}
           className="object-cover rounded-md bg-secondary w-32 h-32"
           onError={() => {

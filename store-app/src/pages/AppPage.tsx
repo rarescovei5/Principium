@@ -1,6 +1,6 @@
+import { useApps } from '@/app/AppsProvider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -10,25 +10,70 @@ import {
 } from '@/components/ui/carousel';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { App } from '@/types';
+import { safeSegment } from '@/lib/safeSegment';
+import { invoke } from '@tauri-apps/api/core';
+import { appDataDir, join } from '@tauri-apps/api/path';
+import { writeFile } from '@tauri-apps/plugin-fs';
+import { Loader2 } from 'lucide-react';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
 const AppPage = () => {
-  const { appId } = useParams();
-  const [app, setApp] = React.useState<App | null>(null);
+  const [isDownloading, setIsDownloading] = React.useState(false);
+  const { appName } = useParams();
+  const { apps, downloadedApps, setDownloadedApps } = useApps();
+  const app = apps.find((app) => app.name === appName);
 
-  React.useEffect(() => {
-    let mockupApp: App = {
-      name: 'Synclite',
-      author: 'Principium',
-      description:
-        'Officia reprehenderit minim non dolore ipsum minim aute qui aute ipsum excepteur aliquip. Qui incididunt enim aliquip tempor id pariatur sit aliqua. Aute occaecat labore ullamco nulla reprehenderit eiusmod culpa qui veniam minim irure et consequat.',
-      screenshots: ['https://via.placeholder.com/150', 'https://via.placeholder.com/150'],
-      categories: ['Productivity'],
-    };
-    setApp(mockupApp);
-  }, []);
+  const installApp = React.useCallback(async () => {
+    setIsDownloading(true);
+    if (!app || !appName) {
+      setIsDownloading(false);
+      return;
+    }
+
+    if (downloadedApps.find((a) => a.name === appName)) {
+      setIsDownloading(false);
+      return;
+    }
+
+    try {
+      const downloadUrl = app.latestRelease?.downloadLink;
+      if (!downloadUrl) throw new Error('Missing latestRelease.downloadLink');
+
+      // Extract filename from URL
+      const filename = safeSegment(app.name.toLowerCase());
+
+      // Call Tauri command to download file natively
+      const dirPath = await appDataDir();
+      await invoke('download_app', { appDir: dirPath, url: downloadUrl, filename });
+
+      // Minimal PATH behavior: if we just downloaded an .exe into appDataDir(),
+      // ensure the app's data directory is on the user's PATH (Windows only).
+      if (filename.toLowerCase().endsWith('.exe')) {
+        await invoke('ensure_dir_on_user_path', { dir: dirPath });
+      }
+
+      // Save metadata (app.json)
+      const downloaded = {
+        appIcon: app.appIcon,
+        name: app.name,
+        author: app.author,
+        type: app.type,
+        repoUrl: app.repoUrl,
+        dateAdded: new Date().toISOString(),
+      };
+
+      const appJsonPath = await join(dirPath, `${safeSegment(app.name)}_app.json`);
+      const jsonBytes = new TextEncoder().encode(JSON.stringify(downloaded, null, 2));
+      await writeFile(appJsonPath, jsonBytes);
+
+      setDownloadedApps((prev) => [...prev, downloaded]);
+    } catch (err) {
+      console.error('Failed to install app:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [app, appName, downloadedApps]);
 
   // Show placeholders while the app is loading
   if (!app) {
@@ -44,15 +89,13 @@ const AppPage = () => {
                 <div className="flex flex-row gap-2">
                   {/* App Author */}
                   <Skeleton className="w-20 h-6 rounded-md" />
-                  {/* App Tags */}
-                  <Skeleton className="w-15 h-6 border rounded-md" />
-                  <Skeleton className="w-15 h-6 border rounded-md" />
+                  {/* App Category */}
                   <Skeleton className="w-15 h-6 border rounded-md" />
                 </div>
               </div>
 
               {/* Download Button */}
-              <Skeleton className="w-30 h-10 rounded-md bg-primary" />
+              <Skeleton className="w-30 h-10 rounded-md bg-secondary" />
             </div>
             {/* App Description */}
             <Skeleton className="w-full h-24 rounded-md" />
@@ -79,7 +122,7 @@ const AppPage = () => {
   return (
     <main className="my-2 mr-2 bg-background rounded-md flex-1">
       <ScrollArea className="h-full min-h-0 relative">
-        <div className="flex flex-col gap-8 p-8">
+        <div className="flex flex-col gap-8 p-8 max-w-[1400px] mx-auto">
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-col gap-4">
               <div className="flex flex-row gap-4 items-center">
@@ -93,18 +136,31 @@ const AppPage = () => {
                 <p className="text-md text-muted-foreground">by {app.author}</p>
 
                 {/* App Tags */}
-                <div className="flex flex-row gap-2">
-                  {app.categories.map((category) => (
-                    <Badge key={category} variant="secondary">
-                      {category}
-                    </Badge>
-                  ))}
-                </div>
+                <Badge key={app.category} variant="secondary">
+                  {app.category}
+                </Badge>
               </div>
             </div>
 
             {/* Download Button */}
-            <Button size="lg">Download</Button>
+            {!app.latestRelease ? (
+              <Button disabled className="w-32" variant="secondary" size="lg">
+                Unfinished
+              </Button>
+            ) : downloadedApps.find((app) => app.name === appName) ? (
+              <Button disabled className="w-32" variant="secondary" size="lg">
+                Installed
+              </Button>
+            ) : (
+              <Button
+                disabled={isDownloading}
+                size="lg"
+                className="w-32"
+                onClick={installApp}
+              >
+                {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Get'}
+              </Button>
+            )}
           </div>
 
           {/* App Description */}

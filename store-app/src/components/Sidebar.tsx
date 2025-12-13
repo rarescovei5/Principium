@@ -27,7 +27,10 @@ const SidebarButton = ({
   path: string;
 }) => {
   const location = useLocation();
-  const isActive = location.pathname === path;
+
+  const isLocationApp = location.pathname.includes('app');
+  const isHome = path === '/';
+  const isActive = location.pathname === path || (isLocationApp && isHome);
 
   return (
     <Link
