@@ -1,10 +1,9 @@
-import { HashRouter, Route, Routes } from 'react-router-dom';
-import Layout from './components/Layout';
-import DiscoverPage from './pages/DiscoverPage';
-import DownloadPage from './pages/DownloadPage';
-import LibraryPage from './pages/LibraryPage';
-import AppPage from './pages/AppPage';
-
+import { HashRouter, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
+import DiscoverPage from "./pages/DiscoverPage";
+import DownloadPage from "./pages/DownloadPage";
+import LibraryPage from "./pages/LibraryPage";
+import AppPage from "./pages/AppPage";
 
 function App() {
   return (

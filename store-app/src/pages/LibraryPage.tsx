@@ -94,7 +94,7 @@ const LibraryApp = (libraryApp: LibraryApp) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>
-              <Link to={`/package/${libraryApp.appId}`}>
+              <Link to={`/package/${libraryApp.id}`}>
                 <PackageIcon /> App Page
               </Link>
             </DropdownMenuItem>
