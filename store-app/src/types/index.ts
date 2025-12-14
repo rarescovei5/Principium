@@ -18,10 +18,11 @@ export type DiscoverApp = Pick<App, 'appIcon' | 'name' | 'category'>;
 
 
 export interface DownloadedApp {
-  appIcon: string;
+  appIcon: string; // the icon of the app
   name: string;
   author: string;
-  type: string;
+  type: string; // the type of the app (cli or app)
   repoUrl: string;
-  dateAdded: string;
+  dateAdded: string; // the date when the app was downloaded
+  tagName: string; // the tag when the app was downloaded
 }

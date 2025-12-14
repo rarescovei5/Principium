@@ -1,4 +1,4 @@
-import { DownloadIcon, LibraryIcon, StoreIcon } from 'lucide-react';
+import { CloudDownloadIcon, LibraryIcon, StoreIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
 import React from 'react';
@@ -10,7 +10,7 @@ const Sidebar = () => {
         <SidebarButton icon={<StoreIcon />} label="Discover" path="/" />
       </div>
       <div className="flex flex-col gap-2">
-        <SidebarButton icon={<DownloadIcon />} label="Downloads" path="/downloads" />
+        <SidebarButton icon={<CloudDownloadIcon />} label="Downloads" path="/downloads" />
         <SidebarButton icon={<LibraryIcon />} label="Library" path="/library" />
       </div>
     </aside>
